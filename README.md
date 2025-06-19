@@ -70,7 +70,7 @@ accelerate launch train_flux_fill.py
 - Python 3.12+
 - PyTorch 2.0+
 - NVIDIA GPU с 12+ GB VRAM
-- CUDA 11.8
+- CUDA 12.*
 
 ## Мониторинг обучения
 
