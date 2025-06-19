@@ -1,0 +1,26 @@
+# Утилиты
+tqdm
+
+# Научные библиотеки
+numpy
+scikit-learn
+
+# Работа с изображениями и CV
+opencv-python
+
+# Diffusers (Hugging Face)
+diffusers
+accelerate
+transformers
+
+# PEFT (Parameter-Efficient Fine-Tuning)
+peft
+
+# GGUF
+gguf
+
+# Логирование и визуализация
+tensorboard
+
+# NVIDIA TensorRT (если установлен через pip, иначе устанавливается отдельно)
+tensorrt
