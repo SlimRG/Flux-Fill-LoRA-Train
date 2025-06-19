@@ -73,14 +73,10 @@ from diffusers.models.embeddings import apply_rotary_emb
 from diffusers.pipelines.flux.pipeline_flux_fill import FluxFillPipeline
 
 # Diffusers - утилиты
-from diffusers.utils.constants import USE_PEFT_BACKEND
-from diffusers.utils.peft_utils import scale_lora_layers, unscale_lora_layers
 from diffusers.utils.loading_utils import load_image
-from diffusers.utils.import_utils import is_torch_npu_available, is_torch_version
 from diffusers.utils.torch_utils import is_compiled_module
 from diffusers.utils.state_dict_utils import convert_state_dict_to_diffusers, convert_unet_state_dict_to_peft
 from diffusers.training_utils import cast_training_params
-from diffusers.configuration_utils import register_to_config
 
 # Diffusers - обработчики изображений
 from diffusers.image_processor import VaeImageProcessor
@@ -101,9 +97,6 @@ from transformers.configuration_utils import PretrainedConfig
 # PEFT
 from peft import LoraConfig
 from peft.utils import get_peft_model_state_dict, set_peft_model_state_dict
-
-# TensorRT
-import tensorrt.tensorrt as trt
 
 # TensorBoard
 import tensorboard
@@ -1088,10 +1081,10 @@ def read_image(
             # Перекодируем из BGR (стандарт OpenCV) в RGB
             image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
         else:
-            print(f"Failed to open {image_path}.")
+            logging.error(f"Ошибка открытия {image_path}.")
     except Exception as e:
         # Любые ошибки чтения или декодирования выводим в консоль
-        print(f"An error occurred while processing {image_path}: {e}")
+        logging.error(f"Ошибка при обработке {image_path}: {e}")
         image = None
 
     return image
@@ -1370,7 +1363,7 @@ def compute_file_sha256(file_path: Union[str, Path]) -> str:
     except Exception as e:
         # Если произошла любая ошибка (нет доступа, файл не найден и т.п.),
         # печатаем её и возвращаем пустую строку
-        print(f"Ошибка вычисления SHA-256 для файла '{path}': {e}")
+        logging.error(f"Ошибка вычисления SHA-256 для файла '{path}': {e}")
         return ""
     
 def compute_density_for_timestep_sampling(
@@ -2090,7 +2083,7 @@ def main():
         try:
             accelerator.init_trackers(tracker_name)
         except:
-            print("Trackers not initialized")
+            logging.error("Трекеры не инициализированы")
     
     # Вычисляем итоговый размер батча с учетом процессов и накопления градиентов
     total_batch_size = TRAIN_BATCH_SIZE * accelerator.num_processes * GRAD_ACCUMULATION_STEPS
@@ -2132,14 +2125,14 @@ def main():
 
         # Если checkpoint не найден — начинаем новую тренировку
         if path is None:
-            accelerator.print(
+            logging.info(
                 f"Контрольная точка '{RESUME_FROM_CHECKPOINT}' не найдена. Запуск новой тренировки."
             )
             resume_from_checkpoint = None
             initial_global_step = 0
         else:
             # Загружаем состояние тренировки из найденного checkpoint
-            accelerator.print(f"Восстановление из контрольной точки {path}")
+            logging.info(f"Восстановление из контрольной точки {path}")
             accelerator.load_state(os.path.join(OUTPUT_DIR, path))
             global_step = int(path.split("-")[-1])
 
@@ -2917,7 +2910,7 @@ def main():
         
     # Завершение обучения
     accelerator.end_training()
-    print(f"Сохранено в {OUTPUT_DIR}")
+    logging.info(f"Сохранено в {OUTPUT_DIR}")
 
 if __name__ == "__main__":
     main()
